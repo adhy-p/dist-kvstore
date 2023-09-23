@@ -28,10 +28,11 @@ expected = [
   Message(message={'ret_msg': 'Error: Key/Value must be specified'}, seq_num=0),
   Message(message={'ret_msg': 'KeyNotFound'}, seq_num=0),
   Message(message={'ret_msg': 'Error: Key/Value must be specified'}, seq_num=0),
-  Message(message={'ret_msg': 'Error: Key/Value must be specified'}, seq_num=0) ,
+  Message(message={'ret_msg': 'Error: Key/Value must be specified'}, seq_num=0),
   Message(message={'ret_msg': 'Error: Empty message'}, seq_num=0),
   Message(message={'ret_msg': 'Error: Unknown command'}, seq_num=0),
 ]
+
 
 def test_kvs_server():
   s = KVSServer(1)
