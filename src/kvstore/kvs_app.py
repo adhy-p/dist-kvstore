@@ -1,11 +1,11 @@
 from base_classes.application import Application
-
 from collections import defaultdict
+
 
 class KVStore(Application):
   def __init__(self):
     self.__storage = defaultdict[str, str](str)
-  
+
   def get(self, key: str) -> str:
     if key not in self.__storage:
       return "KeyNotFound"

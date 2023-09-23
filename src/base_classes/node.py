@@ -1,6 +1,7 @@
 from abc import ABC
 from base_classes.application import Application
 
+
 class Node(ABC):
   """
   A node is a single computation unit in distributed systems.

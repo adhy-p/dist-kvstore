@@ -1,4 +1,5 @@
-from attrs import define 
+from attrs import define
+
 
 @define
 class Message:
@@ -7,10 +8,10 @@ class Message:
   for requests, message attr contains:
   - command: str = GET | PUT | APPEND
   - key: str
-  - [optional] value: str 
+  - [optional] value: str
 
   for replies, message attr contains:
-  - ret_msg: str 
+  - ret_msg: str
   """
-  message: dict 
-  seq_num: int 
+  message: dict[str, str]
+  seq_num: int
