@@ -1,4 +1,4 @@
-from base_classes.application import Application
+from kvstore_lib.application import Application
 from collections import defaultdict
 
 

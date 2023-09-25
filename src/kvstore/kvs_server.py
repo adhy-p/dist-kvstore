@@ -1,5 +1,5 @@
-from base_classes.node import Node
-from base_classes.message import Message
+from kvstore_lib.node import Node
+from kvstore_lib.message import Message
 from kvstore.kvs_app import KVStore
 
 
@@ -14,9 +14,6 @@ class KVSServer(Node):
     }
 
   def handle_command(self, m: Message) -> Message:
-    if not m:
-      return Message({'ret_msg': 'Error: Empty message'}, 0)
-
     msg: dict[str, str] = m.message
     # seq_num: int = m.seq_num
     if msg.get('command', None) not in self.COMMANDS:
@@ -25,7 +22,9 @@ class KVSServer(Node):
     cmd: str = msg['command']
     key: str | None = msg.get('key')
     value: str | None = msg.get('value', None)
+
     ret: str = ""
+
     if cmd == 'GET':
       if not key:
         return Message({'ret_msg': 'Error: Key must be specified'}, 0)

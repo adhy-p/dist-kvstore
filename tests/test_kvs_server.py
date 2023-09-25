@@ -1,4 +1,4 @@
-from base_classes.message import Message
+from kvstore_lib.message import Message
 from kvstore.kvs_server import KVSServer
 
 messages = [
@@ -13,7 +13,6 @@ messages = [
   Message(message={'command': 'GET', 'key': 'with_value', 'value': '1234'}, seq_num=1),
   Message(message={'command': 'PUT', 'key': 'without_value'}, seq_num=1),
   Message(message={'command': 'APPEND', 'key': 'without_value'}, seq_num=1),
-  None,
   Message(message={'command': 'NEW_COMMAND', 'key': 'hello', 'value': 'world'}, seq_num=1),
 ]
 
@@ -29,7 +28,6 @@ expected = [
   Message(message={'ret_msg': 'KeyNotFound'}, seq_num=0),
   Message(message={'ret_msg': 'Error: Key/Value must be specified'}, seq_num=0),
   Message(message={'ret_msg': 'Error: Key/Value must be specified'}, seq_num=0),
-  Message(message={'ret_msg': 'Error: Empty message'}, seq_num=0),
   Message(message={'ret_msg': 'Error: Unknown command'}, seq_num=0),
 ]
 
