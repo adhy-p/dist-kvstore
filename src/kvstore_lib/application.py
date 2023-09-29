@@ -1,6 +1,8 @@
-from abc import ABC
+from abc import ABC, abstractmethod
+from typing import Any
 
 
 class Application(ABC):
-  def __init__(self):
-    pass
+    @abstractmethod
+    def execute(self, command: Any):
+        ...

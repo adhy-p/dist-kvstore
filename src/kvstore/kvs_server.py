@@ -1,40 +1,22 @@
 from kvstore_lib.node import Node
 from kvstore_lib.message import Message
 from kvstore.kvs_app import KVStore
+from typing import Any
 
 
 class KVSServer(Node):
-  def __init__(self, id: int):
-    super().__init__(id, KVStore())
-    self.app: KVStore
-    self.COMMANDS = {
-      'GET',
-      'PUT',
-      'APPEND',
-    }
+    def __init__(self, address: int):
+        super().__init__(address, KVStore())
+        self.app: KVStore
 
-  def handle_command(self, m: Message) -> Message:
-    msg: dict[str, str] = m.message
-    # seq_num: int = m.seq_num
-    if msg.get('command', None) not in self.COMMANDS:
-      return Message({'ret_msg': 'Error: Unknown command'}, 0)
-
-    cmd: str = msg['command']
-    key: str | None = msg.get('key')
-    value: str | None = msg.get('value', None)
-
-    ret: str = ""
-
-    if cmd == 'GET':
-      if not key:
-        return Message({'ret_msg': 'Error: Key must be specified'}, 0)
-      ret = self.app.get(key)
-    elif cmd == 'PUT':
-      if not key or not value:
-        return Message({'ret_msg': 'Error: Key/Value must be specified'}, 0)
-      ret = self.app.put(key, value)
-    elif cmd == 'APPEND':
-      if not key or not value:
-        return Message({'ret_msg': 'Error: Key/Value must be specified'}, 0)
-      ret = self.app.append(key, value)
-    return Message({'ret_msg': ret}, 0)
+    def handle_command(self, command: Message) -> Message:
+        sender: int = command.src
+        receiver: int = command.dst
+        app_cmd: dict[Any, Any] = command.msg
+        if receiver == self.address:
+            try:
+                ret = self.app.execute(app_cmd)
+                return Message(self.address, sender, {'ret_msg': ret}, 0)
+            except Exception as e:
+                return Message(self.address, sender, {'ret_msg': str(e)}, 0)
+        return Message(self.address, sender, {'ret_msg': 'Wrong Address'}, 0)
