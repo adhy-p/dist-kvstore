@@ -1,5 +1,9 @@
 from kvstore_lib.application import Application
-from kvstore_lib.message import Message
+from kvstore_lib.amo_command import AMOCommand
+from kvstore_lib.command import Command
+from kvstore_lib.kvs_result import KVSResult
+from kvstore_lib.amo_result import AMOResult
+from kvstore_lib.kvs_exception import KVSException
 
 
 class AMOApp(Application):
@@ -9,16 +13,18 @@ class AMOApp(Application):
     """
     def __init__(self, app: Application):
         self.app: Application = app
-        self.__last_cmds: dict[int, Message] = {}
-        self.__executed_cmds: dict[Message, Message] = {}
+        self.__last_cmds: dict[int, AMOCommand] = {}
+        self.__executed_cmds: dict[AMOCommand, AMOResult] = {}
 
-    def execute(self, amo_cmd: Message) -> Message:
+    def execute(self, amo_cmd: Command) -> AMOResult:
+        if not isinstance(amo_cmd, AMOCommand):
+            raise Exception('Error: did not receive AMOCommand')
         if amo_cmd in self.__executed_cmds:
             return self.__executed_cmds[amo_cmd]
         if self._already_executed(amo_cmd):
             raise Exception('Error: result has been garbage-collected')
 
-        app_cmd: dict[str, str] = amo_cmd.msg
+        app_cmd: Command = amo_cmd.cmd
         sender: int = amo_cmd.src
         receiver: int = amo_cmd.dst
         seq_num: int = amo_cmd.seq_num
@@ -26,9 +32,9 @@ class AMOApp(Application):
         ret: str = ""
         try:
             ret = self.app.execute(app_cmd)
-        except Exception as e:
+        except KVSException as e:
             ret = str(e)
-        execution_result: Message = Message(receiver, sender, {'ret_msg': ret}, seq_num+1)
+        execution_result: AMOResult = AMOResult(receiver, sender, KVSResult(ret), seq_num+1)
 
         # garbage collection
         if sender in self.__last_cmds:
@@ -37,13 +43,13 @@ class AMOApp(Application):
         self.__executed_cmds[amo_cmd] = execution_result
         return execution_result
 
-    def _already_executed(self, command: Message) -> bool:
+    def _already_executed(self, command: AMOCommand) -> bool:
         if command in self.__executed_cmds:
             return True
         cmd_src: int = command.src
         if not cmd_src:
             return False
         if cmd_src in self.__last_cmds:
-            last_cmd: Message = self.__last_cmds[cmd_src]
+            last_cmd: AMOCommand = self.__last_cmds[cmd_src]
             return self.__executed_cmds[last_cmd].seq_num >= command.seq_num
         return False

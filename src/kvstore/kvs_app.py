@@ -1,6 +1,8 @@
 from kvstore_lib.application import Application
 from collections import defaultdict
-from typing import Any
+from kvstore_lib.command import Command
+from kvstore_lib.kvs_command import KVSCommand
+from kvstore_lib.kvs_exception import KVSException
 
 
 class KVStore(Application):
@@ -12,27 +14,27 @@ class KVStore(Application):
             'APPEND',
         }
 
-    def execute(self, app_command: dict[Any, Any]) -> str:
-        if app_command.get('cmd_type', None) not in self.COMMANDS:
-            raise Exception('Error: Unknown command')
+    def execute(self, command: Command) -> str:
+        if not isinstance(command, KVSCommand):
+            raise KVSException('Error: Not a KVS command')
 
-        cmd_type: str = app_command['cmd_type']
-        key: str | None = app_command.get('key')
-        value: str | None = app_command.get('value', None)
+        cmd_type: str = command.cmd_type
+        key: str = command.key
+        value: str | None = command.value
 
         ret: str = ""
+        if cmd_type not in self.COMMANDS:
+            raise KVSException('Error: Unknown command')
 
         if cmd_type == 'GET':
-            if not key:
-                raise Exception('Error: Key must be specified')
             ret = self._get(key)
         elif cmd_type == 'PUT':
-            if not key or not value:
-                raise Exception('Error: Key/Value must be specified')
+            if not value:
+                raise KVSException('Error: Key/Value must be specified')
             ret = self._put(key, value)
         elif cmd_type == 'APPEND':
-            if not key or not value:
-                raise Exception('Error: Key/Value must be specified')
+            if not value:
+                raise KVSException('Error: Key/Value must be specified')
             ret = self._append(key, value)
         return ret
 

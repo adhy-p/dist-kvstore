@@ -1,0 +1,2 @@
+class KVSException(Exception):
+    pass
